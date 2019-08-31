@@ -1,0 +1,724 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>@hasezoey/typegoose</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">@hasezoey/typegoose</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1> @hasezoey/typegoose</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#typegoose" id="typegoose" style="color: inherit; text-decoration: none;">
+					<h1>Typegoose</h1>
+				</a>
+				<p><sub>(These badges are from hasezoey:r6/master)</sub><br><a href="https://travis-ci.com/hasezoey/typegoose"><img src="https://travis-ci.com/hasezoey/typegoose.svg?branch=r6/master" alt="Build Status"></a>
+					<a href="https://coveralls.io/github/hasezoey/typegoose?branch=r6/master"><img src="https://coveralls.io/repos/github/hasezoey/typegoose/badge.svg?branch=r6/master#feb282019" alt="Coverage Status"></a>
+				<a href="https://www.npmjs.com/package/@hasezoey/typegoose"><img src="https://img.shields.io/npm/dt/@hasezoey/typegoose.svg" alt="npm"></a></p>
+				<p>Define Mongoose models using TypeScript classes.</p>
+				<a href="#basic-usage" id="basic-usage" style="color: inherit; text-decoration: none;">
+					<h2>Basic usage</h2>
+				</a>
+				<pre><code class="language-ts"><span class="hljs-keyword">import</span> { prop, getModelForClass } <span class="hljs-keyword">from</span> <span class="hljs-string">'typegoose'</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> mongoose <span class="hljs-keyword">from</span> <span class="hljs-string">'mongoose'</span>;
+
+mongoose.connect(<span class="hljs-string">'mongodb://localhost:27017/test'</span>);
+
+<span class="hljs-keyword">class</span> User {
+  <span class="hljs-meta">@prop</span>()
+  name?: <span class="hljs-built_in">string</span>;
+}
+
+<span class="hljs-keyword">const</span> UserModel = getModelForClass(User);
+
+<span class="hljs-comment">// UserModel is a regular Mongoose Model with correct types</span>
+(<span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> { _id: id } = <span class="hljs-keyword">await</span> UserModel.create({ name: <span class="hljs-string">'JohnDoe'</span> });
+  <span class="hljs-keyword">const</span> user = <span class="hljs-keyword">await</span> UserModel.findById(id).exec();
+
+  <span class="hljs-built_in">console</span>.log(user);
+  <span class="hljs-comment">// prints { _id: 59218f686409d670a97e53e0, name: 'JohnDoe', __v: 0 }</span>
+})();</code></pre>
+				<a href="#motivation" id="motivation" style="color: inherit; text-decoration: none;">
+					<h2>Motivation</h2>
+				</a>
+				<p>A common problem when using Mongoose with TypeScript is that you have to define both the Mongoose model and the TypeScript interface. If the model changes, you also have to keep the TypeScript interface file in sync or the TypeScript interface would not represent the real data structure of the model.</p>
+				<p>Typegoose aims to solve this problem by defining only a TypeScript interface (class) which need to be enhanced with special Typegoose decorators.</p>
+				<p>Under the hood it uses the Reflect &amp; <a href="https://github.com/rbuckton/reflect-metadata">reflect-metadata</a> API to retrieve the types of the properties, so redundancy can be significantly reduced.</p>
+				<p>Instead of:</p>
+				<pre><code class="language-ts"><span class="hljs-keyword">interface</span> Car {
+  model?: <span class="hljs-built_in">string</span>;
+}
+
+<span class="hljs-keyword">interface</span> Job {
+  title?: <span class="hljs-built_in">string</span>;
+  position?: <span class="hljs-built_in">string</span>;
+}
+
+<span class="hljs-keyword">interface</span> User {
+  name?: <span class="hljs-built_in">string</span>;
+  age: <span class="hljs-built_in">number</span>;
+  job?: Job;
+  car: Car | <span class="hljs-built_in">string</span>;
+}
+
+mongoose.model(<span class="hljs-string">'User'</span>, {
+  name: <span class="hljs-built_in">String</span>,
+  age: { <span class="hljs-keyword">type</span>: <span class="hljs-built_in">Number</span>, required: <span class="hljs-literal">true</span> },
+  job: {
+    title: <span class="hljs-built_in">String</span>;
+    position: <span class="hljs-built_in">String</span>;
+  },
+  car: { <span class="hljs-keyword">type</span>: Schema.Types.ObjectId, ref: <span class="hljs-string">'Car'</span> }
+});
+
+mongoose.model(<span class="hljs-string">'Car'</span>, {
+  model: <span class="hljs-built_in">string</span>,
+});</code></pre>
+				<p>You can just:</p>
+				<pre><code class="language-ts"><span class="hljs-keyword">class</span> Job {
+  <span class="hljs-meta">@prop</span>()
+  title?: <span class="hljs-built_in">string</span>;
+
+  <span class="hljs-meta">@prop</span>()
+  position?: <span class="hljs-built_in">string</span>;
+}
+
+<span class="hljs-keyword">class</span> Car {
+  <span class="hljs-meta">@prop</span>()
+  model?: <span class="hljs-built_in">string</span>;
+}
+
+<span class="hljs-keyword">class</span> User {
+  <span class="hljs-meta">@prop</span>()
+  name?: <span class="hljs-built_in">string</span>;
+
+  <span class="hljs-meta">@prop</span>({ required: <span class="hljs-literal">true</span> })
+  age!: <span class="hljs-built_in">number</span>;
+
+  <span class="hljs-meta">@prop</span>()
+  job?: Job;
+
+  <span class="hljs-meta">@prop</span>({ ref: Car })
+  car?: Ref&lt;Car&gt;;
+}</code></pre>
+				<p>Please note that sub documents do not have to extend Typegoose. You can still give them default value in <code>prop</code> decorator, but you can&#39;t create static or instance methods on them.</p>
+				<hr>
+				<a href="#requirements" id="requirements" style="color: inherit; text-decoration: none;">
+					<h2>Requirements</h2>
+				</a>
+				<ul>
+					<li>TypeScript 3.2+</li>
+					<li>Node 8+</li>
+					<li>mongoose 5+</li>
+					<li><code>emitDecoratorMetadata</code> and <code>experimentalDecorators</code> must be enabled in <code>tsconfig.json</code></li>
+					<li><code>reflect-metadata</code> must be installed</li>
+				</ul>
+				<a href="#install" id="install" style="color: inherit; text-decoration: none;">
+					<h2>Install</h2>
+				</a>
+				<p><code>npm i -s typegoose</code></p>
+				<p>You also need to install <code>mongoose</code>, since version 5 it is listed as a peer-dependency</p>
+				<p><code>npm i -s mongoose</code></p>
+				<p><em>Note: typegoose uses the package <code>object.fromEntries</code> as a polyfill for node versions &lt;12</em></p>
+				<a href="#a-hrefmigrate_to_6mdmigrate-to-600a" id="a-hrefmigrate_to_6mdmigrate-to-600a" style="color: inherit; text-decoration: none;">
+					<h2><a href="migrate_to_6.md">Migrate to 6.0.0</a></h2>
+				</a>
+				<a href="#testing" id="testing" style="color: inherit; text-decoration: none;">
+					<h2>Testing</h2>
+				</a>
+				<p><code>npm test</code></p>
+				<a href="#versioning" id="versioning" style="color: inherit; text-decoration: none;">
+					<h2>Versioning</h2>
+				</a>
+				<p><code>Major.Minor.Fix</code> (or how npm expresses it <code>Major.Minor.Patch</code>)
+				(This Project should comply with <a href="https://semver.org">Semver</a>)</p>
+				<a href="#join-our-discord-server" id="join-our-discord-server" style="color: inherit; text-decoration: none;">
+					<h2>Join Our Discord Server</h2>
+				</a>
+				<p>To ask questions or just talk with us <a href="https://discord.gg/BpGjTTD">join our Discord Server</a></p>
+				<hr>
+				<a href="#api-documentation" id="api-documentation" style="color: inherit; text-decoration: none;">
+					<h2>API Documentation</h2>
+				</a>
+				<a href="#typegoose-class" id="typegoose-class" style="color: inherit; text-decoration: none;">
+					<h3>Typegoose class</h3>
+				</a>
+				<p>Since 6.0.0 deprecated, please try to remove it</p>
+				<a href="#methods" id="methods" style="color: inherit; text-decoration: none;">
+					<h3>Methods</h3>
+				</a>
+				<p><code>getModelForClass&lt;T&gt;(cl: T)</code></p>
+				<p>This method returns the corresponding Mongoose Model for the class (<code>T</code>). If no Mongoose model exists for this class yet, one will be created automatically (by calling the method <code>setModelForClass</code>).</p>
+				<p><code>setModelForClass&lt;T&gt;(cl: T)</code></p>
+				<p>This Method is Deprecated see <a href="migrate_to_6.md">Migrate to 6.0.0</a></p>
+				<a href="#property-decorators" id="property-decorators" style="color: inherit; text-decoration: none;">
+					<h2>Property decorators</h2>
+				</a>
+				<p>Typegoose comes with TypeScript decorators, which responsibility is to connect the Mongoose schema behind the TypeScript class.</p>
+				<a href="#propoptions" id="propoptions" style="color: inherit; text-decoration: none;">
+					<h3>prop(options)</h3>
+				</a>
+				<p>The <code>prop</code> decorator adds the target class property to the Mongoose schema as a property. Typegoose checks the decorated property&#39;s type and sets the schema property accordingly. If another Typegoose extending class is given as the type, Typegoose will recognize this property as a sub document.</p>
+				<p>The <code>options</code> object accepts multiple config properties:</p>
+				<ul>
+					<li><p><code>required</code>: Just like the <a href="http://mongoosejs.com/docs/api.html#schematype_SchemaType-required">Mongoose required</a>
+							it accepts a handful of parameters. Please note that it&#39;s the developer&#39;s responsibility to make sure that
+						if <code>required</code> is set to <code>false</code> then the class property should be <a href="https://www.typescriptlang.org/docs/handbook/interfaces.html#optional-properties">optional</a>.</p>
+						<p>Note: for coding style (and type completion) you should use <code>!</code> when it is marked as required</p>
+						<pre><code class="language-ts"><span class="hljs-comment">// this is now required in the schema</span>
+<span class="hljs-meta">@prop</span>({ required: <span class="hljs-literal">true</span> })
+firstName!: <span class="hljs-built_in">string</span>;
+
+<span class="hljs-comment">// by default, a property is not required</span>
+<span class="hljs-meta">@prop</span>()
+lastName?: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// using the ? optional property</span></code></pre>
+					</li>
+					<li><p><code>index</code>: Tells Mongoose whether to define an index for the property.</p>
+						<pre><code class="language-ts"><span class="hljs-meta">@prop</span>({ index: <span class="hljs-literal">true</span> })
+indexedField?: <span class="hljs-built_in">string</span>;</code></pre>
+					</li>
+					<li><p><code>unique</code>: Just like the <a href="http://mongoosejs.com/docs/api.html#schematype_SchemaType-unique">Mongoose unique</a>, tells Mongoose to ensure a unique index is created for this path.</p>
+						<pre><code class="language-ts"><span class="hljs-comment">// this field is now unique across the collection</span>
+<span class="hljs-meta">@prop</span>({ unique: <span class="hljs-literal">true</span> })
+uniqueId?: <span class="hljs-built_in">string</span>;</code></pre>
+					</li>
+					<li><p><code>enum</code>: The enum option accepts a string array. The class property which gets this decorator should have an enum-like type which values are from the provided string array. The way how the enum is created is delegated to the developer, Typegoose needs a string array which hold the enum values, and a TypeScript type which tells the possible values of the enum.
+						However, if you use TS 2.4+, you can use string enum as well.</p>
+						<pre><code class="language-ts"><span class="hljs-keyword">enum</span> Gender {
+  MALE = <span class="hljs-string">'male'</span>,
+  FEMALE = <span class="hljs-string">'female'</span>,
+}
+
+<span class="hljs-meta">@prop</span>({ <span class="hljs-keyword">enum</span>: Gender })
+gender?: Gender;</code></pre>
+					</li>
+					<li><p><code>lowercase</code>: for strings only; whether to always call .toLowerCase() on the value.</p>
+						<pre><code class="language-ts"><span class="hljs-meta">@prop</span>({ lowercase: <span class="hljs-literal">true</span> })
+nickName?: <span class="hljs-built_in">string</span>;</code></pre>
+					</li>
+					<li><p><code>uppercase</code>: for strings only; whether to always call .toUpperCase() on the value.</p>
+						<pre><code class="language-ts"><span class="hljs-meta">@prop</span>({ uppercase: <span class="hljs-literal">true</span> })
+nickName?: <span class="hljs-built_in">string</span>;</code></pre>
+					</li>
+					<li><p><code>trim</code>: for strings only; whether to always call .trim() on the value.</p>
+						<pre><code class="language-ts"><span class="hljs-meta">@prop</span>({ trim: <span class="hljs-literal">true</span> })
+nickName?: <span class="hljs-built_in">string</span>;</code></pre>
+					</li>
+					<li><p><code>default</code>: The provided value will be the default for that Mongoose property.</p>
+						<pre><code class="language-ts"><span class="hljs-meta">@prop</span>({ <span class="hljs-keyword">default</span>: <span class="hljs-string">'Nick'</span> })
+nickName?: <span class="hljs-built_in">string</span>;</code></pre>
+					</li>
+					<li><p><code>_id</code>: When false, no _id is added to the subdocument</p>
+						<pre><code class="language-ts"><span class="hljs-keyword">class</span> Car {}
+
+<span class="hljs-meta">@prop</span>({ _id: <span class="hljs-literal">false</span> })
+car?: Car;</code></pre>
+					</li>
+					<li><p><code>ref</code>: By adding the <code>ref</code> option with another Typegoose class as value, a Mongoose reference property will be created. The type of the property on the Typegoose extending class should be <code>Ref&lt;T&gt;</code> (see Types section).</p>
+						<pre><code class="language-ts"><span class="hljs-keyword">class</span> Car {}
+
+<span class="hljs-meta">@prop</span>({ ref: Car })
+car?: Ref&lt;Car&gt;;</code></pre>
+					</li>
+					<li><p><code>refPath</code>: Is the same as <code>ref</code>, only that it looks at the path specified, and this path decides which model to use</p>
+						<pre><code class="language-ts"><span class="hljs-keyword">class</span> Car {}
+<span class="hljs-keyword">class</span> Shop {}
+
+<span class="hljs-comment">// in another class</span>
+<span class="hljs-keyword">class</span> Another {
+  <span class="hljs-meta">@prop</span>({ required: <span class="hljs-literal">true</span>, <span class="hljs-keyword">enum</span>: <span class="hljs-string">'Car'</span> | <span class="hljs-string">'Shop'</span> })
+  which!: <span class="hljs-built_in">string</span>;
+
+  <span class="hljs-meta">@prop</span>({ refPath: <span class="hljs-string">'which'</span> })
+  kind?: Ref&lt;Car | Shop&gt;;
+}</code></pre>
+					</li>
+					<li><p><code>min</code> / <code>max</code> (numeric validators): Same as <a href="http://mongoosejs.com/docs/api.html#schema_number_SchemaNumber-max">Mongoose numberic validators</a>.</p>
+						<pre><code class="language-ts"><span class="hljs-meta">@prop</span>({ min: <span class="hljs-number">10</span>, max: <span class="hljs-number">21</span> })
+age?: <span class="hljs-built_in">number</span>;</code></pre>
+					</li>
+					<li><p><code>minlength</code> / <code>maxlength</code> / <code>match</code> (string validators): Same as <a href="http://mongoosejs.com/docs/api.html#schema_string_SchemaString-match">Mongoose string validators</a>.</p>
+						<pre><code class="language-ts"><span class="hljs-meta">@prop</span>({ minlength: <span class="hljs-number">5</span>, maxlength: <span class="hljs-number">10</span>, match: <span class="hljs-regexp">/[0-9a-f]*/</span> })
+favouriteHexNumber?: <span class="hljs-built_in">string</span>;</code></pre>
+					</li>
+					<li><p><code>validate</code> (custom validators): You can define your own validator function/regex using this. The function has to return a <code>boolean</code> or a Promise (async validation).</p>
+						<pre><code class="language-ts"><span class="hljs-comment">// you have to get your own `isEmail` function, this is a placeholder</span>
+
+<span class="hljs-meta">@prop</span>({ validate: <span class="hljs-function">(<span class="hljs-params">value</span>) =&gt;</span> isEmail(value)})
+email?: <span class="hljs-built_in">string</span>;
+
+<span class="hljs-comment">// or</span>
+
+<span class="hljs-meta">@prop</span>({ validate: <span class="hljs-keyword">async</span> (value) =&gt; { <span class="hljs-keyword">await</span> isEmail(value) })
+email?: <span class="hljs-built_in">string</span>;
+
+<span class="hljs-comment">// or</span>
+
+<span class="hljs-meta">@prop</span>({ validate: {
+    validator: <span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> isEmail(val),
+    message: <span class="hljs-string">`{VALUE} is not a valid email`</span>
+}})
+email?: <span class="hljs-built_in">string</span>;
+
+<span class="hljs-comment">// or</span>
+
+<span class="hljs-meta">@prop</span>({ validate: <span class="hljs-regexp">/\S+@\S+\.\S+/</span> })
+email?: <span class="hljs-built_in">string</span>;
+
+<span class="hljs-comment">// you can also use multiple validators in an array.</span>
+
+<span class="hljs-meta">@prop</span>({ validate:
+  [
+    {
+        validator: <span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> isEmail(val),
+        message: <span class="hljs-string">`{VALUE} is not a valid email`</span>
+    },
+    {
+        validator: <span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> isBlacklisted(val),
+        message: <span class="hljs-string">`{VALUE} is blacklisted`</span>
+    }
+  ]
+})
+email?: <span class="hljs-built_in">string</span>;</code></pre>
+					</li>
+					<li><p><code>alias</code> (alias): Same as <a href="https://mongoosejs.com/docs/guide.html#aliases">Mongoose Alias</a>, only difference is the extra property for type completion</p>
+						<pre><code class="language-ts"><span class="hljs-keyword">class</span> Dummy {
+  <span class="hljs-meta">@prop</span>({ alias: <span class="hljs-string">"helloWorld"</span> })
+  <span class="hljs-keyword">public</span> hello: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// will be included in the DB</span>
+  <span class="hljs-keyword">public</span> helloWorld: <span class="hljs-built_in">string</span>; <span class="hljs-comment">// will NOT be included in the DB, just for type completion (gets passed as hello in the DB)</span>
+}</code></pre>
+					</li>
+				</ul>
+				<a href="#virtuals" id="virtuals" style="color: inherit; text-decoration: none;">
+					<h4>Virtuals</h4>
+				</a>
+				<ul>
+					<li><p>Mongoose gives developers the option to create <a href="http://mongoosejs.com/docs/api.html#schema_Schema-virtual">virtual properties</a>. This means that actual database read/write will not occur these are just &#39;calculated properties&#39;. A virtual property can have a setter and a getter. TypeScript also has a similar feature which Typegoose uses for virtual property definitions (using the <code>prop</code> decorator).</p>
+						<p>example:</p>
+						<pre><code class="language-ts"><span class="hljs-keyword">class</span> Name {
+  <span class="hljs-meta">@prop</span>()
+  firstName?: <span class="hljs-built_in">string</span>;
+
+  <span class="hljs-meta">@prop</span>()
+  lastName?: <span class="hljs-built_in">string</span>;
+
+  <span class="hljs-comment">// this will create a virtual property called 'fullName'</span>
+  <span class="hljs-keyword">get</span> fullName() {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${this.firstName}</span> <span class="hljs-subst">${this.lastName}</span>`</span>;
+  }
+  <span class="hljs-keyword">set</span> fullName(full) {
+    <span class="hljs-keyword">const</span> [firstName, lastName] = full.split(<span class="hljs-string">' '</span>);
+    <span class="hljs-keyword">this</span>.firstName = firstName;
+    <span class="hljs-keyword">this</span>.lastName = lastName;
+  }
+}</code></pre>
+						<p>DB Document:</p>
+						<pre><code class="language-js">{
+  <span class="hljs-attr">_id</span>: ObjectId(<span class="hljs-string">"&lt;some long id&gt;"</span>),
+  <span class="hljs-attr">firstName</span>: <span class="hljs-string">"Will"</span>,
+  <span class="hljs-attr">lastName</span>: <span class="hljs-string">"Smith"</span>
+}</code></pre>
+					</li>
+					<li><p>Non-Virtuals are supported too:<br>example:</p>
+						<pre><code class="language-ts"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setFullName</span>(<span class="hljs-params">val: <span class="hljs-built_in">string</span>[]</span>): <span class="hljs-title">string</span> </span>{
+  <span class="hljs-keyword">return</span> val.join(<span class="hljs-string">' '</span>);
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getFullname</span>(<span class="hljs-params">val: <span class="hljs-built_in">string</span></span>): <span class="hljs-title">string</span>[] </span>{
+  <span class="hljs-keyword">return</span> val.split(<span class="hljs-string">' '</span>);
+}
+
+<span class="hljs-keyword">class</span> Name {
+  <span class="hljs-meta">@prop</span>({ <span class="hljs-keyword">set</span>: setFullName, <span class="hljs-keyword">get</span>: getFullname })
+  fullname: <span class="hljs-built_in">string</span>[]; <span class="hljs-comment">// this is just for type completion &amp; getting the type for the schema</span>
+}
+
+...
+<span class="hljs-keyword">await</span> NameModel.create({ fullname: [<span class="hljs-string">'Will'</span>, <span class="hljs-string">'Smith'</span>] });
+<span class="hljs-keyword">const</span> [first, last]: <span class="hljs-built_in">string</span>[] = (<span class="hljs-keyword">await</span> NameModel.findOne({}).exec()).fullname;</code></pre>
+						<p>DB Document:</p>
+						<pre><code class="language-js">{
+  <span class="hljs-attr">_id</span>: ObjectId(<span class="hljs-string">"&lt;some long id&gt;"</span>),
+  <span class="hljs-attr">fullname</span>: <span class="hljs-string">"Will Smith"</span>
+}</code></pre>
+					</li>
+					<li><p>Virtual-Populate is also supported by doing</p>
+						<pre><code class="language-ts"><span class="hljs-keyword">class</span> RefClass {
+  <span class="hljs-meta">@prop</span>({ required: <span class="hljs-literal">true</span>, ref: Virtual })
+  <span class="hljs-keyword">public</span> refToName: Ref&lt;Virtual&gt;;
+}
+<span class="hljs-keyword">class</span> Name {
+  <span class="hljs-meta">@prop</span>({ ref: RefClass, foreignField: <span class="hljs-string">'refToName'</span>, localField: <span class="hljs-string">'_id'</span>, justOne: <span class="hljs-literal">false</span> })
+  <span class="hljs-keyword">public</span> somevalue: Ref&lt;RefClass&gt;;
+}</code></pre>
+						<p>Options (<a href="https://mongoosejs.com/docs/api/schema.html#schema_Schema-virtual">look here for more details</a>):</p>
+						<ul>
+							<li><code>ref</code>: This is like a normal ref [Required]</li>
+							<li><code>foreignField</code>: Which property(on the ref-Class) to match <code>localField</code> against [Required]</li>
+							<li><code>localField</code>: Which property(on the current-Class) to match <code>foreignField</code> against [Required]</li>
+							<li><code>justOne</code>: Return as One Document(true) or as Array(false) [Optional]</li>
+							<li><code>count</code>: Return the number of Documents found instead of the actual Documents [Optional]</li>
+						</ul>
+					</li>
+				</ul>
+				<a href="#arraypropoptions" id="arraypropoptions" style="color: inherit; text-decoration: none;">
+					<h3>arrayProp(options)</h3>
+				</a>
+				<p>The <code>arrayProp</code> is a <code>prop</code> decorator which makes it possible to create array schema properties.</p>
+				<p>The <code>options</code> object accepts <code>required</code>, <code>enum</code> and <code>default</code>, just like the <code>prop</code> decorator. In addition to these the following properties exactly one should be given:</p>
+				<ul>
+					<li><p><code>items</code>: This will tell Typegoose that this is an array which consists of primitives (if <code>String</code>, <code>Number</code>, or other primitive type is given) or this is an array which consists of subdocuments (if it&#39;s extending the <code>Typegoose</code> class).</p>
+						<pre><code class="language-ts"><span class="hljs-meta">@arrayProp</span>({ items: <span class="hljs-built_in">String</span> })
+languages?: <span class="hljs-built_in">string</span>[];</code></pre>
+					</li>
+				</ul>
+				<p>Note that unfortunately the <a href="https://github.com/rbuckton/reflect-metadata">reflect-metadata</a> API does not let us determine the type of the array, it only returns <code>Array</code> when the type of the property is queried. This is why redundancy is required here.</p>
+				<ul>
+					<li><p><code>itemsRef</code>: In mutual exclusion with <code>items</code>, this tells Typegoose that instead of a subdocument array, this is an array with references in it. On the Mongoose side this means that an array of Object IDs will be stored under this property. Just like with <code>ref</code> in the <code>prop</code> decorator, the type of this property should be <code>Ref&lt;T&gt;[]</code>.</p>
+						<pre><code class="language-ts"><span class="hljs-keyword">class</span> Car {}
+
+<span class="hljs-comment">// in another class</span>
+<span class="hljs-meta">@arrayProp</span>({ itemsRef: Car })
+previousCars?: Ref&lt;Car&gt;[];</code></pre>
+					</li>
+					<li><p><code>itemsRefPath</code>(IRP): Is the same as <code>itemsRef</code> only that it looks at the specified path of the class which specifies which model to use</p>
+						<pre><code class="language-ts"><span class="hljs-keyword">class</span> Car {}
+<span class="hljs-keyword">class</span> Shop {}
+
+<span class="hljs-comment">// in another class</span>
+<span class="hljs-keyword">class</span> Another {
+  <span class="hljs-meta">@prop</span>({ required: <span class="hljs-literal">true</span>, <span class="hljs-keyword">enum</span>: [<span class="hljs-string">'Car'</span>, <span class="hljs-string">'Shop'</span>] })
+  which!: <span class="hljs-built_in">string</span>;
+
+  <span class="hljs-meta">@arrayProp</span>({ itemsRefPath: <span class="hljs-string">'which'</span> })
+  items?: Ref&lt;Car | Shop&gt;[];
+}</code></pre>
+					</li>
+				</ul>
+				<a href="#mappropoptions" id="mappropoptions" style="color: inherit; text-decoration: none;">
+					<h3>mapProp(options)</h3>
+				</a>
+				<p>The <code>mapProp</code> is a <code>prop</code> decorator which makes it possible to create map schema properties.</p>
+				<p>The options object accepts <code>enum</code> and <code>default</code>, just like <code>prop</code>  decorator. In addition to these the following properties are accepted:</p>
+				<ul>
+					<li><p><code>of</code>  : This will tell Typegoose that the Map value consists of primitives (if <code>String</code>, <code>Number</code>, or other primitive type is given) or this is an array which consists of subdocuments (if it&#39;s extending the <code>Typegoose</code> class).</p>
+						<pre><code class="language-ts"><span class="hljs-keyword">class</span> Car {
+  <span class="hljs-meta">@mapProp</span>({ of: Car })
+  <span class="hljs-keyword">public</span> keys?: Map&lt;<span class="hljs-built_in">string</span>, Car&gt;;
+}</code></pre>
+					</li>
+				</ul>
+				<a href="#method-decorators" id="method-decorators" style="color: inherit; text-decoration: none;">
+					<h3>Method decorators</h3>
+				</a>
+				<p>Method Decorators are deprecated see <a href="migrate_to_6.md">Migrate to 6.0.0</a></p>
+				<a href="#class-decorators" id="class-decorators" style="color: inherit; text-decoration: none;">
+					<h3>Class decorators</h3>
+				</a>
+				<p>Mongoose allows the developer to add pre and post <a href="http://mongoosejs.com/docs/middleware.html">hooks / middlewares</a> to the schema. With this it is possible to add document transformations and observations before or after validation, save and more.</p>
+				<p>Typegoose provides this functionality through TypeScript&#39;s class decorators.</p>
+				<a href="#modeloptions" id="modeloptions" style="color: inherit; text-decoration: none;">
+					<h4>modelOptions</h4>
+				</a>
+				<p>The Model Options can be used like below</p>
+				<pre><code class="language-ts"><span class="hljs-meta">@modelOptions</span>({ existingMongoose, schemaOptions, existingConnection })
+<span class="hljs-keyword">class</span> Name {}</code></pre>
+				<p>The Options for <code>@modelOptions</code>:</p>
+				<ul>
+					<li><code>existingMongoose: mongoose</code>: An existing Mongoose instance can also be passed down. If given, Typegoose uses this Mongoose instance&#39;s <code>model</code> methods.</li>
+					<li><code>schemaOptions: mongoose.SchemaOptions</code>: Additional <a href="http://mongoosejs.com/docs/guide.html#options">schema options</a> can be passed down to the schema-to-be-created.</li>
+					<li><code>existingConnection: mongoose.Connection</code>: An existing Mongoose connection can also be passed down. If given, Typegoose uses this Mongoose instance&#39;s <code>model</code> methods.</li>
+				</ul>
+				<a href="#pre" id="pre" style="color: inherit; text-decoration: none;">
+					<h4>pre</h4>
+				</a>
+				<p>We can simply attach a <code>@pre</code> decorator to the Typegoose class and define the hook function like you normally would in Mongoose.
+				(Method supports REGEXP)</p>
+				<pre><code class="language-ts"><span class="hljs-meta">@pre</span>&lt;Car&gt;(<span class="hljs-string">'save'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">next</span>) </span>{
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.model === <span class="hljs-string">'Tesla'</span>) {
+    <span class="hljs-keyword">this</span>.isFast = <span class="hljs-literal">true</span>;
+  }
+  next();
+})
+<span class="hljs-keyword">class</span> Car {
+  <span class="hljs-meta">@prop</span>({ required: <span class="hljs-literal">true</span> })
+  model!: <span class="hljs-built_in">string</span>;
+
+  <span class="hljs-meta">@prop</span>()
+  isFast?: <span class="hljs-built_in">boolean</span>;
+}</code></pre>
+				<p>This will execute the pre-save hook each time a <code>Car</code> document is saved. Inside the pre-hook Mongoose binds the actual document to <code>this</code>.</p>
+				<p>Note that additional typing information is required either by passing the class itself as a type parameter <code>&lt;Car&gt;</code> or explicity telling TypeScript that <code>this</code> is a <code>Car</code> (<code>this: Car</code>). This will grant typing informations inside the hook function.</p>
+				<a href="#post" id="post" style="color: inherit; text-decoration: none;">
+					<h4>post</h4>
+				</a>
+				<p>Same as <code>pre</code>, the <code>post</code> hook is also implemented as a class decorator. Usage is equivalent with the one Mongoose provides.
+				(Method supports REGEXP)</p>
+				<pre><code class="language-ts"><span class="hljs-meta">@post</span>&lt;Car&gt;<span class="hljs-function">(<span class="hljs-params">'save', (<span class="hljs-params">car</span>) =&gt; {
+  <span class="hljs-keyword">if</span> (<span class="hljs-params">car.topSpeedInKmH &gt; 300</span>) {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-params">car.model, 'is fast!'</span>);
+  }
+}</span>)
+<span class="hljs-params">class</span> <span class="hljs-params">Car</span> {
+  @<span class="hljs-params">prop</span>(<span class="hljs-params">{ required: <span class="hljs-literal">true</span> }</span>)
+  <span class="hljs-params">model</span>!: <span class="hljs-params">string</span>;
+
+  @<span class="hljs-params">prop</span>(<span class="hljs-params">{ required: <span class="hljs-literal">true</span> }</span>)
+  <span class="hljs-params">topSpeedInKmH</span>!: <span class="hljs-params">number</span>;
+}</span></code></pre>
+				<p>Of course <code>this</code> is not the document in a post hook (see Mongoose docs). Again typing information is required either by explicit parameter typing or by providing a template type.</p>
+				<a href="#plugin" id="plugin" style="color: inherit; text-decoration: none;">
+					<h4>plugin</h4>
+				</a>
+				<p>Using the <code>plugin</code> decorator enables the developer to attach various Mongoose plugins to the schema. Just like the regular <code>schema.plugin()</code> call, the decorator accepts 1 or 2 parameters: the plugin itself, and an optional configuration object. Multiple <code>plugin</code> decorator can be used for a single Typegoose class.</p>
+				<p>If the plugin enhances the schema with additional properties or instance / static methods this typing information should be added manually to the Typegoose class as well.</p>
+				<pre><code class="language-ts"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> findOrCreate <span class="hljs-keyword">from</span> <span class="hljs-string">'mongoose-findorcreate'</span>;
+
+<span class="hljs-meta">@plugin</span>(findOrCreate)
+<span class="hljs-keyword">class</span> User {
+  <span class="hljs-comment">// this isn't the complete method signature, just an example</span>
+  <span class="hljs-keyword">static</span> findOrCreate(condition: DocumentType&lt;User&gt;):
+    <span class="hljs-built_in">Promise</span>&lt;{ doc: DocumentType&lt;User&gt;, created: <span class="hljs-built_in">boolean</span> }&gt;;
+}
+
+<span class="hljs-keyword">const</span> UserModel = getModelForClass(User);
+<span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> UserModel.findOrCreate({ ... });</code></pre>
+				<a href="#index" id="index" style="color: inherit; text-decoration: none;">
+					<h4>index</h4>
+				</a>
+				<p>The <code>@index</code> decorator can be used to define advanced index types and index options not available via the
+					<code>index</code> option of the <code>@prop</code> property decorator, such as compound indices, GeoJSON index types,
+					partial indices, expiring documents, etc. Any values supported by
+					<a href="https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/#db.collection.createIndex">MongoDB&#39;s createIndex()</a>
+				are also valid for <code>@index</code>. For more info refer to interface <code>IndexOptions</code></p>
+				<pre><code class="language-ts"><span class="hljs-meta">@index</span>({ article: <span class="hljs-number">1</span>, user: <span class="hljs-number">1</span> }, { unique: <span class="hljs-literal">true</span> })
+<span class="hljs-meta">@index</span>({ location: <span class="hljs-string">'2dsphere'</span> })
+<span class="hljs-meta">@index</span>({ article: <span class="hljs-number">1</span> }, { partialFilterExpression: { stars: { $gte: <span class="hljs-number">4.5</span> } } })
+<span class="hljs-keyword">class</span> Location {
+  <span class="hljs-meta">@prop</span>()
+  article?: <span class="hljs-built_in">number</span>;
+
+  <span class="hljs-meta">@prop</span>()
+  user?: <span class="hljs-built_in">number</span>;
+
+  <span class="hljs-meta">@prop</span>()
+  stars?: <span class="hljs-built_in">number</span>;
+
+  <span class="hljs-meta">@arrayProp</span>({ items: <span class="hljs-built_in">Array</span> })
+  location?: [[<span class="hljs-built_in">Number</span>]]
+}</code></pre>
+				<a href="#types" id="types" style="color: inherit; text-decoration: none;">
+					<h3>Types</h3>
+				</a>
+				<p>Some additional types were added to make Typegoose more user friendly.<br>(for some additional types, that are not exported by default can be accessed via <code>import * as types from &#39;typegoose/types&#39;</code>)</p>
+				<a href="#documenttypet" id="documenttypet" style="color: inherit; text-decoration: none;">
+					<h4>DocumentType<T></h4>
+				</a>
+				<p>This is basically the logical &#39;and&#39; of the <code>T</code> and the <code>mongoose.Document</code>, so that both the Mongoose instance properties/functions and the user defined properties/instance methods are available on the instance.</p>
+				<a href="#returnmodeltypet" id="returnmodeltypet" style="color: inherit; text-decoration: none;">
+					<h4>ReturnModelType<T></h4>
+				</a>
+				<p>This is the logical &#39;and&#39; of <code>mongoose.Model&lt;DocumentType&lt;T&gt;&gt;</code> and <code>T</code>, so that the Mongoose model creates <code>DocumentType&lt;T&gt;</code> typed instances and all user defined static methods are available on the model.</p>
+				<a href="#reft" id="reft" style="color: inherit; text-decoration: none;">
+					<h4>Ref<T></h4>
+				</a>
+				<p>For reference properties:
+					<code>Ref&lt;T&gt;</code> - <code>T</code> if populated and <code>ObjectID</code> if unpopulated.
+				-&gt; there are TypeGuards for this to check named:</p>
+				<ul>
+					<li><code>isDocument(T)</code>: returns <code>true</code> if <code>T</code> is populated, false otherwise</li>
+					<li><code>isDocumentArray(T)</code>: returns <code>true</code> if <code>T</code>  is an Array <strong>AND</strong> is fully populated</li>
+				</ul>
+				<hr>
+				<a href="#improvements" id="improvements" style="color: inherit; text-decoration: none;">
+					<h2>Improvements</h2>
+				</a>
+				<ul>
+					<li>Add Tests for:<ul>
+							<li>Hooks: add hook test for pre &amp; post with error</li>
+						</ul>
+					</li>
+				</ul>
+				<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+					<h2>Notes</h2>
+				</a>
+				<ul>
+					<li><code>mongoose</code> is a peer-dependency, and a dev dependency to install it for dev purposes</li>
+					<li>Please dont add comments with <code>+1</code> or something like that, use the Reactions</li>
+					<li>Typegoose <strong>cannot</strong> be used with classes of the same name, it will always return the first build class with that name</li>
+					<li>All Models in Typegoose are set to strict by default, and <strong>cant</strong> be changed!</li>
+					<li><code>npm run doc</code> generates all documentation for all files that can be used as modules (is used for github-pages)</li>
+					<li><code>npm run doc:all</code> generates documentation even for internal modules</li>
+					<li>This module should not be used with <code>ts-node --transpile-only</code>, <code>--type-check</code> must be added at least, szokodiakos#196</li>
+				</ul>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_defaultclasses_.html">"default<wbr>Classes"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_hooks_.html">"hooks"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_index_.html">"index"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_method_.html">"method"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_optionsprop_.html">"options<wbr>Prop"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_plugin_.html">"plugin"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_prop_.html">"prop"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_typegoose_.html">"typegoose"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_typeguards_.html">"typeguards"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_types_.html">"types"</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>
