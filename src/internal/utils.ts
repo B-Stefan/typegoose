@@ -176,9 +176,8 @@ export function getName<T, U extends NoParamConstructor<T>>(cl: U) {
  *  Returns the list of all parent classes.
  *  @param cl Class which potentially extend other class
  */
-export function getParentClasses<U= unknown>(cl: U): (new () => unknown)[] {
-
-  const list = [];
+export function getParentClasses<U = unknown>(cl: U) {
+  const list: (new () => unknown)[] = [];
   let parentCtor = Object.getPrototypeOf(cl);
 
   while (parentCtor && parentCtor.name && parentCtor.name !== 'Object') {
