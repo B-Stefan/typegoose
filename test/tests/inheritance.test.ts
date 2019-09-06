@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { model as inheritanceClass, Skyscraper } from '../models/inheritanceClass';
+import { BuildingTypes, model as inheritanceClass, Skyscraper } from '../models/inheritanceClass';
 
 export function suite() {
   it('should set all direct parent props', async () => {
@@ -9,10 +9,21 @@ export function suite() {
     expect(instance.width).to.equals(100);
   });
 
+  it('should allow discriminator for array items', async () => {
+    const instance = await inheritanceClass.create({});
+    instance.buildings.push({type: BuildingTypes.SummerHouse, distanceToLake: 20});
+    instance.buildings.push({type: BuildingTypes.Garage, slotsForCars: 100});
+    await instance.save();
+    expect(instance.buildings).to.be.lengthOf(2);
+    const [summerHouse, garage] = instance.buildings;
+    expect(summerHouse.distanceToLake).to.equals(20);
+    expect(garage.slotsForCars).to.equals(100);
+  });
+
   it('should merge all parent schema options', async () => {
     const instance = await inheritanceClass.create({});
     expect(instance.schema.get('collection')).to.equals('skyscrapers');
-    expect(instance.schema.get('discriminatorKey')).to.equals('width');
+    expect(instance.schema.get('discriminatorKey')).to.equals('type');
   });
 
   it('should set all parent props for nested schemas', async () => {

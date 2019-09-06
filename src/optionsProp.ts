@@ -9,6 +9,8 @@ export interface IModelOptions {
   schemaOptions?: mongoose.SchemaOptions;
   /** An Existing Connection */
   existingConnection?: mongoose.Connection;
+  /** Key to identify the class */
+  discriminatorId?: string;
   /** Typegoose Custom Options */
   options?: {
     /**

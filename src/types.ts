@@ -203,6 +203,8 @@ export interface ArrayPropOptions extends BasePropOptions {
   itemsRefPath?: any;
   /** Same as {@link PropOptions.refType}, only that it is for an array */
   itemsRefType?: RefSchemaType;
+  /** Child classes to be accepted in this array */
+  discriminatorClasses?: NoParamConstructor<unknown>[];
 }
 
 export interface MapPropOptions extends BasePropOptions {

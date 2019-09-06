@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 
 import { IModelOptions } from '../typegoose';
-import { EmptyVoidFn, NoParamConstructor } from '../types';
+import { ArrayPropOptions, EmptyVoidFn, NoParamConstructor } from '../types';
 import { DecoratorKeys } from './constants';
 import { buildSchemas, hooks, plugins, schemas, virtuals } from './data';
 import { NoValidClass } from './errors';
@@ -101,6 +101,33 @@ function getSchemaForClass<T, U extends NoParamConstructor<T>>(
     sch.index(index.fields, index.options);
   }
 
+  sch.eachPath((path, item) => {
+    const itemSchema: mongoose.Schema
+    // @ts-ignore
+      & {__arrayPropOptions: Pick<ArrayPropOptions, 'discriminatorClasses'> } = item.schema;
+
+    if (itemSchema && itemSchema.__arrayPropOptions && itemSchema.__arrayPropOptions.discriminatorClasses) {
+      const discriminatorKey = itemSchema.get('discriminatorKey');
+
+      itemSchema.__arrayPropOptions.discriminatorClasses.forEach((discriminatorClass) => {
+        const discrSchema = _buildSchema(discriminatorClass, { discriminatorKey });
+
+        itemSchema.set('discriminatorKey', discriminatorKey);
+
+        // @ts-ignore
+        if (discrSchema.paths[discriminatorKey]) {
+          // @ts-ignore
+
+          discrSchema.paths[discriminatorKey].options.$skipDiscriminatorCheck = true;
+        }
+        const { discriminatorId } =
+        Reflect.getMetadata(DecoratorKeys.ModelOptions, discriminatorClass) || {} as IModelOptions;
+
+        // @ts-ignore
+        item.discriminator(discriminatorId ? discriminatorId : getName(discriminatorClass), discrSchema);
+      });
+    }
+  });
   buildSchemas.set(name, sch);
 
   return sch;
