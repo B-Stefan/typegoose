@@ -8,13 +8,11 @@ import { getModelForClass, modelOptions } from '../../src/typegoose';
   }
 })
 export class Building {
-
   @prop({default: 100})
   public width: number;
 }
 
 export class OfficeBuilding extends Building {
-
   @prop({default: 4})
   public doors: number;
 }
@@ -30,7 +28,6 @@ export class Garage extends Building {
   }
 })
 export class Skyscraper extends OfficeBuilding {
-
   @prop({default: 'Some cool string'})
   public name: string;
 

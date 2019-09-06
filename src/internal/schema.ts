@@ -18,7 +18,6 @@ import { getName, getParentClasses } from './utils';
 export function _buildSchema<T, U extends NoParamConstructor<T>>(
                                 cl: U,
                                 opt: mongoose.SchemaOptions = {}) {
-
   let  sch: mongoose.Schema<U>;
 
   // Go though every class from top level to bottom

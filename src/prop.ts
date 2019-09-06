@@ -218,7 +218,6 @@ function baseProp(
   }
 
   if (whatis === WhatIsIt.ARRAY) {
-
     const virtualSchemaItem = _buildSchema(Type,  { _id: rawOptions._id });
 
     schemas.get(name)[key] = {

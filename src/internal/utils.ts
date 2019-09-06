@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-import { isNullOrUndefined, deprecate } from 'util';
+import { deprecate, isNullOrUndefined } from 'util';
 import { IModelOptions } from '../typegoose';
 import {
   NoParamConstructor,
