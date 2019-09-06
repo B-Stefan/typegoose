@@ -123,22 +123,14 @@ export function buildSchema<T, U extends NoParamConstructor<T>>(cl: U) {
   if (buildSchemas.get(cl.name)) {
     return buildSchemas.get(cl.name);
   }
-  let sch: mongoose.Schema<U>;
-  /** Parent Constructor */
-  let parentCtor = Object.getPrototypeOf(cl.prototype).constructor;
-  // iterate trough all parents
-  while (parentCtor && parentCtor.name !== 'Object') {
-    /* istanbul ignore next */
-    if (parentCtor.name === 'Typegoose') { // TODO: remove this if, if the Typegoose class gets removed [DEPRECATION]
-      deprecate(() => undefined, 'The Typegoose Class is deprecated, please try to remove it')();
-    }
-    // extend schema
-    sch = _buildSchema(parentCtor, sch);
-    // set next parent
-    parentCtor = Object.getPrototypeOf(parentCtor.prototype).constructor;
-  }
-  // get schema of current model
-  sch = _buildSchema(cl, sch);
+  const {schemaOptions = {}}: IModelOptions = Reflect.getMetadata(DecoratorKeys.ModelOptions, cl) || {};
+
+  const sch = _buildSchema(cl, schemaOptions);
+
+  Object.entries(schemaOptions)
+    .forEach(([key, value]: [keyof mongoose.SchemaOptions, unknown]) => {
+      sch.set(key, value);
+    });
 
   return sch;
 }

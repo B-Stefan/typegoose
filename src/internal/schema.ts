@@ -5,18 +5,42 @@ import { EmptyVoidFn, NoParamConstructor } from '../types';
 import { DecoratorKeys } from './constants';
 import { buildSchemas, hooks, plugins, schemas, virtuals } from './data';
 import { NoValidClass } from './errors';
-import { getName } from './utils';
+import { getName, getParentClasses } from './utils';
 
 /**
  * Private schema builder out of class props
  * -> If you discover this, dont use this function, use Typegoose.buildSchema!
  * @param cl The not initialized Class
- * @param name The Name to save the Schema Under (Mostly Constructor.name)
- * @param sch Already Existing Schema?
+ * @param opt The options for the mongoose schema
  * @returns Returns the Build Schema
  * @private
  */
 export function _buildSchema<T, U extends NoParamConstructor<T>>(
+                                cl: U,
+                                opt: mongoose.SchemaOptions = {}) {
+
+  let  sch: mongoose.Schema<U>;
+
+  // Go though every class from top level to bottom
+  getParentClasses(cl)
+    .reverse()
+    .forEach((parent) => {
+      sch = getSchemaForClass(parent, sch);
+    });
+
+  return getSchemaForClass<T, U>(cl, sch, opt);
+}
+
+/**
+ * Private schema builder out of class props
+ * -> If you discover this, dont use this function, use Typegoose.buildSchema!
+ * @param cl The not initialized Class
+ * @param sch Already Existing Schema?
+ * @param opt The options for the mongoose schema
+ * @returns Returns the Build Schema
+ * @private
+ */
+function getSchemaForClass<T, U extends NoParamConstructor<T>>(
   cl: U,
   sch?: mongoose.Schema,
   opt: mongoose.SchemaOptions = {}

@@ -218,12 +218,15 @@ function baseProp(
   }
 
   if (whatis === WhatIsIt.ARRAY) {
+
+    const virtualSchemaItem = _buildSchema(Type,  { _id: rawOptions._id });
+
     schemas.get(name)[key] = {
       ...schemas.get(name)[key][0], // [0] is needed, because "initasArray" adds this (empty)
       ...options,
       type: [{
         ...(typeof options._id !== 'undefined' ? { _id: options._id } : {}),
-        ...subSchema
+        ...{type:  virtualSchemaItem}
       }]
     };
 
@@ -244,7 +247,7 @@ function baseProp(
     return;
   }
 
-  const virtualSchema = _buildSchema(Type, null, { _id: rawOptions._id });
+  const virtualSchema = _buildSchema(Type, { _id: rawOptions._id });
   schemas.get(name)[key] = {
     ...schemas.get(name)[key],
     ...options,

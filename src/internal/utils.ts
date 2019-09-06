@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-import { isNullOrUndefined } from 'util';
+import { isNullOrUndefined, deprecate } from 'util';
 import { IModelOptions } from '../typegoose';
 import {
   NoParamConstructor,
@@ -170,4 +170,29 @@ export function getName<T, U extends NoParamConstructor<T>>(cl: U) {
     (options.schemaOptions ? options.schemaOptions.collection : undefined);
 
   return suffix ? `${baseName}_${suffix}` : baseName;
+}
+
+/**
+ *  Returns the list of all parent classes.
+ *  @param cl Class which potentially extend other class
+ */
+export function getParentClasses<U= unknown>(cl: U): (new () => unknown)[] {
+
+  const list = [];
+  let parentCtor = Object.getPrototypeOf(cl);
+
+  while (parentCtor && parentCtor.name && parentCtor.name !== 'Object') {
+    /* istanbul ignore next */
+    if (parentCtor.name === 'Typegoose') { // TODO: remove this if, if the Typegoose class gets removed [DEPRECATION]
+      deprecate(() => undefined, 'The Typegoose Class is deprecated, please try to remove it')();
+      break;
+    }
+
+    // extend schema
+    list.push(parentCtor);
+    // next parent
+    parentCtor = Object.getPrototypeOf(parentCtor);
+  }
+
+  return list;
 }
