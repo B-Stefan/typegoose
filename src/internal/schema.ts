@@ -8,7 +8,7 @@ import { NoValidClass } from './errors';
 import { getName, getParentClasses } from './utils';
 
 /**
- * Private schema builder out of class props
+ * Private schema builder for a class including parent classes
  * -> If you discover this, dont use this function, use Typegoose.buildSchema!
  * @param cl The not initialized Class
  * @param opt The options for the mongoose schema
@@ -16,8 +16,8 @@ import { getName, getParentClasses } from './utils';
  * @private
  */
 export function _buildSchema<T, U extends NoParamConstructor<T>>(
-                                cl: U,
-                                opt: mongoose.SchemaOptions = {}) {
+  cl: U,
+  opt: mongoose.SchemaOptions = {}) {
   let  sch: mongoose.Schema<U>;
 
   // Go though every class from top level to bottom
@@ -31,7 +31,7 @@ export function _buildSchema<T, U extends NoParamConstructor<T>>(
 }
 
 /**
- * Private schema builder out of class props
+ * Private schema builder for a single class
  * -> If you discover this, dont use this function, use Typegoose.buildSchema!
  * @param cl The not initialized Class
  * @param sch Already Existing Schema?
