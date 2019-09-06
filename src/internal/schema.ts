@@ -62,7 +62,7 @@ function getSchemaForClass<T, U extends NoParamConstructor<T>>(
     schemas.set(name, {});
   }
 
-  if (!(sch instanceof mongoose.Schema)) {
+  if (!(sch instanceof Schema)) {
     sch = new Schema(schemas.get(name), schemaOptions);
   } else {
     sch = sch.clone();
