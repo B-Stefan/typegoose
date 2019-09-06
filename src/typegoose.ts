@@ -190,6 +190,13 @@ export function getDiscriminatorModelForClass<T, U extends NoParamConstructor<T>
   }
 
   const sch = buildSchema(cl);
+
+  const discriminatorKey =  sch.get('discriminatorKey');
+  // @ts-ignore
+  if (sch.paths[discriminatorKey]) {
+  // @ts-ignore
+    sch.paths[discriminatorKey].options.$skipDiscriminatorCheck = true;
+  }
   const model = from.discriminator(name, sch, id ? id : name);
 
   return addModelToTypegoose(model, cl);
