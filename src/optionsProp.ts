@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 import { DecoratorKeys } from './internal/constants';
-import { assignMetadata } from './internal/utils';
+import { assignModelOptionsMetadata } from './internal/utils';
 
 export interface IModelOptions {
   /** An Existing Mongoose Connection */
@@ -32,6 +32,6 @@ export interface IModelOptions {
  */
 export function modelOptions(options: IModelOptions) {
   return (constructor: any) => {
-    assignMetadata(DecoratorKeys.ModelOptions, options, constructor);
+    assignModelOptionsMetadata(DecoratorKeys.ModelOptions, options, constructor);
   };
 }

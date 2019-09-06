@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as mongoose from 'mongoose';
 import { DecoratorKeys } from '../../src/internal/constants';
-import { assignMetadata } from '../../src/internal/utils';
+import { assignModelOptionsMetadata } from '../../src/internal/utils';
 import {
   addModelToTypegoose,
   arrayProp,
@@ -137,14 +137,15 @@ export function suite() {
     expect(doc.test.anotherTest).to.be.equal('hello');
   });
 
-  it('simple test for assignMetadata', () => {
+  it('simple test for assignModelOptionsMetadata', () => {
     class TestAssignMetadata { }
 
-    assignMetadata(DecoratorKeys.ModelOptions, { testOption: 'hello' }, TestAssignMetadata);
+    const options = {};
+    assignModelOptionsMetadata(DecoratorKeys.ModelOptions, { options}, TestAssignMetadata);
 
     const reflected = Reflect.getMetadata(DecoratorKeys.ModelOptions, TestAssignMetadata);
 
     expect(reflected).to.not.be.an('undefined');
-    expect(reflected).to.have.property('testOption', 'hello');
+    expect(reflected).to.have.property('options', options);
   });
 }
